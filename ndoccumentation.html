@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Development — FabLab Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Fira+Code:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+/* ── Variables ── */
+:root {
+  --bg:       #06080d;
+  --bg2:      #0b0f18;
+  --surface:  #111722;
+  --surface2: #161d2a;
+  --border:   rgba(255,255,255,0.06);
+  --accent:   #00e5ff;
+  --gold:     #f5c842;
+  --rose:     #ff6b6b;
+  --green:    #4ade80;
+  --text:     #dde4ef;
+  --muted:    #5a6a80;
+  --fhead:    'Syne', sans-serif;
+  --fbody:    'Lora', Georgia, serif;
+  --fcode:    'Fira Code', monospace;
+}
+
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--fbody);
+  font-size: 1rem;
+  line-height: 1.8;
+  overflow-x: hidden;
+}
+
+/* Noise */
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:.018;
+  pointer-events:none;
+  z-index:9990;
+}
+
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--accent); }
+
+/* ── Progress bar ── */
+#read-progress {
+  position:fixed; top:0; left:0; height:2px; width:0;
+  background:linear-gradient(90deg,var(--accent),var(--gold));
+  z-index:9999; transition:width .1s;
+}
+
+/* ── Custom cursor ── */
+#cur { position:fixed; width:8px; height:8px; background:var(--accent); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); mix-blend-mode:difference; transition:width .15s,height .15s; }
+#cur-r { position:fixed; width:32px; height:32px; border:1px solid rgba(0,229,255,.3); border-radius:50%; pointer-events:none; z-index:9997; transform:translate(-50%,-50%); transition:width .3s,height .3s; }
+
+/* ── Sticky Nav ── */
+.top-nav {
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.9rem 5vw;
+  background:rgba(6,8,13,.85); backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.nav-brand {
+  font-family:var(--fhead); font-size:.85rem; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--accent); text-decoration:none;
+  display:flex; align-items:center; gap:.6rem;
+}
+.nav-brand .dot { width:7px; height:7px; border-radius:50%; background:var(--gold); }
+.nav-links { display:flex; gap:1.8rem; }
+.nav-links a {
+  font-family:var(--fhead); font-size:.72rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); text-decoration:none;
+  transition:color .2s;
+}
+.nav-links a:hover { color:var(--text); }
+.nav-links a.active { color:var(--accent); }
+
+/* ── Hero ── */
+.hero {
+  min-height:100vh;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:8rem 5vw 5rem;
+  position:relative; overflow:hidden;
+}
+
+/* Animated grid */
+.hero::before {
+  content:'';
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);
+  background-size:70px 70px;
+  pointer-events:none;
+}
+
+.hero-eyebrow {
+  font-family:var(--fhead); font-size:.75rem; letter-spacing:.35em;
+  text-transform:uppercase; color:var(--gold);
+  margin-bottom:1.5rem;
+  opacity:0; animation:fadeUp .7s .2s forwards;
+}
+
+.hero h1 {
+  font-family:var(--fhead); font-size:clamp(3.5rem,8vw,8rem);
+  font-weight:800; line-height:.9; letter-spacing:-.01em;
+  color:var(--text); margin-bottom:2rem;
+  opacity:0; animation:fadeUp .7s .4s forwards;
+}
+.hero h1 em { font-style:normal; color:var(--accent); }
+
+.hero-desc {
+  max-width:580px; font-size:1.05rem;
+  color:var(--muted); line-height:1.9;
+  opacity:0; animation:fadeUp .7s .6s forwards;
+}
+
+.hero-meta {
+  display:flex; gap:2.5rem; margin-top:3rem; flex-wrap:wrap;
+  opacity:0; animation:fadeUp .7s .8s forwards;
+}
+.hero-meta-item { display:flex; flex-direction:column; }
+.hero-meta-num {
+  font-family:var(--fhead); font-size:2.2rem; font-weight:700;
+  color:var(--accent); line-height:1;
+}
+.hero-meta-lbl {
+  font-family:var(--fhead); font-size:.68rem; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--muted); margin-top:.2rem;
+}
+
+/* Floating code badge */
+.hero-code-badge {
+  position:absolute; bottom:6rem; right:5vw;
+  background:var(--surface); border:1px solid var(--border);
+  padding:1rem 1.5rem;
+  font-family:var(--fcode); font-size:.78rem; color:var(--green);
+  opacity:0; animation:fadeIn 1s 1.2s forwards;
+  white-space:pre;
+  line-height:1.7;
+}
+.hero-code-badge .cmt { color:var(--muted); }
+.hero-code-badge .kw  { color:var(--accent); }
+.hero-code-badge .st  { color:var(--gold); }
+
+.hero-scroll {
+  position:absolute; bottom:2.5rem; left:5vw;
+  font-family:var(--fhead); font-size:.68rem; letter-spacing:.25em;
+  text-transform:uppercase; color:var(--muted);
+  display:flex; align-items:center; gap:.8rem;
+  opacity:0; animation:fadeIn 1s 1.4s forwards;
+}
+.hero-scroll::before {
+  content:''; width:40px; height:1px; background:var(--muted);
+  animation:scrollLine 2s 2s infinite;
+}
+@keyframes scrollLine { 0%,100%{width:40px} 50%{width:70px} }
+
+/* ── Section wrapper ── */
+.section-wrap { padding:7rem 5vw; position:relative; }
+.section-wrap + .section-wrap { border-top:1px solid var(--border); }
+
+/* Chapter label */
+.chapter-label {
+  font-family:var(--fhead); font-size:.7rem; letter-spacing:.3em;
+  text-transform:uppercase; color:var(--gold); margin-bottom:1rem;
+}
+
+/* Day header */
+.day-header {
+  display:grid; grid-template-columns:auto 1fr; gap:2rem; align-items:start;
+  margin-bottom:4rem;
+}
+.day-number {
+  font-family:var(--fhead); font-size:clamp(5rem,10vw,9rem);
+  font-weight:800; color:transparent; line-height:.85;
+  -webkit-text-stroke:1px rgba(0,229,255,.25);
+  user-select:none; letter-spacing:-.02em;
+}
+.day-title-block {}
+.day-title {
+  font-family:var(--fhead); font-size:clamp(1.8rem,4vw,3.2rem);
+  font-weight:700; line-height:1.1; margin-bottom:.5rem; color:var(--text);
+}
+.day-subtitle {
+  font-size:.95rem; color:var(--muted); line-height:1.7;
+  max-width:520px; font-style:italic;
+}
+
+/* Day image */
+.day-img-wrap {
+  width: 50px%; height:350px; overflow:hidden;
+  border:1px solid var(--border); margin-bottom:2.5rem; position:relative;
+}
+.day-img-wrap img {
+  width:100%; height:100%; object-fit:cover;
+  filter:brightness(.65) saturate(.75);
+  transition:filter .4s,transform .5s;
+}
+.day-img-wrap:hover img { filter:brightness(.8) saturate(1); transform:scale(1.03); }
+.day-img-overlay {
+  position:absolute; bottom:0; left:0; right:0;
+  height:50%; background:linear-gradient(to top,var(--bg),transparent);
+  pointer-events:none;
+}
+.day-img-tag {
+  position:absolute; top:14px; left:14px;
+  background:rgba(6,8,13,.85); backdrop-filter:blur(8px);
+  border:1px solid var(--border);
+  font-family:var(--fhead); font-size:.65rem; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--accent); padding:.3rem .8rem;
+}
+
+/* Two-col layout */
+.day-body {
+  display:grid; grid-template-columns:1fr 1fr; gap:3.5rem; align-items:start;
+}
+@media(max-width:820px){ .day-body { grid-template-columns:1fr; } .day-header { grid-template-columns:1fr; } .day-number { font-size:5rem; } }
+
+/* Topics list */
+.topics-card {
+  background:var(--surface); border:1px solid var(--border); padding:1.8rem;
+}
+.topics-card-label {
+  font-family:var(--fhead); font-size:.68rem; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--accent); margin-bottom:1.2rem;
+  display:flex; align-items:center; gap:.6rem;
+}
+.topics-card-label::after { content:''; flex:1; height:1px; background:var(--border); }
+.topic-item {
+  display:flex; align-items:flex-start; gap:.8rem;
+  padding:.65rem 0; border-bottom:1px solid var(--border);
+}
+.topic-item:last-child { border-bottom:none; }
+.topic-bullet {
+  width:20px; height:20px; border:1px solid var(--accent);
+  border-radius:50%; display:grid; place-items:center;
+  flex-shrink:0; margin-top:2px;
+}
+.topic-bullet i {
+  width:5px; height:5px; background:var(--accent); border-radius:50%;
+}
+.topic-text { font-size:.9rem; color:var(--muted); line-height:1.6; }
+.topic-text code {
+  font-family:var(--fcode); font-size:.82rem;
+  background:rgba(0,229,255,.07); color:var(--accent);
+  padding:.1rem .4rem; border-radius:2px;
+}
+
+/* Content prose */
+.day-prose { }
+.day-prose h3 {
+  font-family:var(--fhead); font-size:1.15rem; font-weight:600;
+  color:var(--text); margin-bottom:.8rem; margin-top:1.8rem;
+}
+.day-prose h3:first-child { margin-top:0; }
+.day-prose p {
+  color:var(--muted); font-size:.95rem; line-height:1.85; margin-bottom:1rem;
+}
+.day-prose p strong { color:var(--text); font-weight:500; }
+
+/* Code block */
+.code-block {
+  background:var(--surface2); border:1px solid var(--border);
+  border-left:3px solid var(--accent);
+  padding:1.2rem 1.4rem; margin:1.5rem 0;
+  font-family:var(--fcode); font-size:.8rem; line-height:1.8;
+  overflow-x:auto; position:relative;
+}
+.code-block .cb-label {
+  position:absolute; top:0; right:0;
+  font-size:.6rem; letter-spacing:.15em; text-transform:uppercase;
+  background:var(--accent); color:var(--bg);
+  padding:.2rem .6rem; font-family:var(--fhead);
+}
+.cb-tag   { color:#7dd3fc; }
+.cb-attr  { color:#fbbf24; }
+.cb-val   { color:#86efac; }
+.cb-cmt   { color:var(--muted); font-style:italic; }
+.cb-kw    { color:#c084fc; }
+.cb-fn    { color:#38bdf8; }
+.cb-str   { color:#86efac; }
+.cb-num   { color:#fb923c; }
+
+/* Key concept pill */
+.concept-pills {
+  display:flex; flex-wrap:wrap; gap:.5rem; margin:1.2rem 0;
+}
+.pill {
+  font-family:var(--fhead); font-size:.65rem; letter-spacing:.12em;
+  text-transform:uppercase; padding:.35rem .85rem;
+  border:1px solid var(--border); color:var(--muted);
+  background:var(--surface); transition:border-color .2s,color .2s;
+}
+.pill:hover { border-color:var(--accent); color:var(--accent); }
+
+/* Info box */
+.info-box {
+  border:1px solid rgba(245,200,66,.15);
+  background:rgba(245,200,66,.04);
+  border-left:3px solid var(--gold);
+  padding:1.1rem 1.3rem; margin:1.5rem 0;
+}
+.info-box-label {
+  font-family:var(--fhead); font-size:.65rem; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--gold); margin-bottom:.4rem;
+}
+.info-box p { color:var(--muted); font-size:.88rem; line-height:1.75; margin:0; }
+.info-box p code { font-family:var(--fcode); color:var(--gold); font-size:.82rem; }
+
+/* ── Timeline sidebar ── */
+.timeline-nav {
+  position:fixed; right:2rem; top:50%; transform:translateY(-50%);
+  display:flex; flex-direction:column; gap:.6rem; z-index:500;
+}
+.tl-dot {
+  width:8px; height:8px; border-radius:50%;
+  border:1px solid var(--muted); background:transparent;
+  transition:background .25s, border-color .25s, transform .25s;
+  cursor:pointer;
+}
+.tl-dot.active { background:var(--accent); border-color:var(--accent); transform:scale(1.4); }
+.tl-dot:hover { border-color:var(--text); }
+
+/* ── Day color accents ── */
+.day-1 .day-number { -webkit-text-stroke:1px rgba(0,229,255,.3); }
+.day-2 .day-number { -webkit-text-stroke:1px rgba(245,200,66,.3); }
+.day-3 .day-number { -webkit-text-stroke:1px rgba(255,107,107,.3); }
+.day-4 .day-number { -webkit-text-stroke:1px rgba(74,222,128,.3); }
+.day-5 .day-number { -webkit-text-stroke:1px rgba(192,132,252,.3); }
+.day-6 .day-number { -webkit-text-stroke:1px rgba(251,146,60,.3); }
+.day-7 .day-number { -webkit-text-stroke:1px rgba(0,229,255,.3); }
+
+.day-1 .topics-card-label,.day-1 .code-block { border-left-color:#00e5ff; }
+.day-2 .topics-card-label,.day-2 .code-block { border-left-color:var(--gold); }
+.day-3 .topics-card-label,.day-3 .code-block { border-left-color:var(--rose); }
+.day-4 .topics-card-label,.day-4 .code-block { border-left-color:var(--green); }
+.day-5 .topics-card-label,.day-5 .code-block { border-left-color:#c084fc; }
+.day-6 .topics-card-label,.day-6 .code-block { border-left-color:#fb923c; }
+.day-7 .topics-card-label,.day-7 .code-block { border-left-color:#00e5ff; }
+
+.day-1 .topics-card-label { color:#00e5ff; }
+.day-2 .topics-card-label { color:var(--gold); }
+.day-3 .topics-card-label { color:var(--rose); }
+.day-4 .topics-card-label { color:var(--green); }
+.day-5 .topics-card-label { color:#c084fc; }
+.day-6 .topics-card-label { color:#fb923c; }
+.day-7 .topics-card-label { color:#00e5ff; }
+
+.day-2 .chapter-label { color:var(--gold); }
+.day-3 .chapter-label { color:var(--rose); }
+.day-4 .chapter-label { color:var(--green); }
+.day-5 .chapter-label { color:#c084fc; }
+.day-6 .chapter-label { color:#fb923c; }
+.day-7 .chapter-label { color:var(--accent); }
+
+/* Day 7 project card */
+.project-showcase {
+  grid-column:1/-1;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  overflow:hidden; position:relative;
+  display:grid; grid-template-columns:1fr 1fr; gap:0;
+}
+@media(max-width:820px){ .project-showcase { grid-template-columns:1fr; } }
+.ps-img { height:280px; overflow:hidden; }
+.ps-img img { width:100%; height:100%; object-fit:cover; filter:brightness(.7); transition:filter .4s,transform .5s; }
+.project-showcase:hover .ps-img img { filter:brightness(.9); transform:scale(1.04); }
+.ps-body { padding:2.5rem; display:flex; flex-direction:column; justify-content:center; }
+.ps-tag { font-family:var(--fhead); font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:1rem; }
+.ps-title { font-family:var(--fhead); font-size:2rem; font-weight:700; margin-bottom:1rem; }
+.ps-desc { font-size:.9rem; color:var(--muted); line-height:1.8; margin-bottom:1.5rem; }
+.ps-links { display:flex; gap:.8rem; }
+.ps-link {
+  font-family:var(--fhead); font-size:.68rem; letter-spacing:.12em;
+  text-transform:uppercase; padding:.55rem 1.2rem;
+  text-decoration:none; transition:background .25s,color .25s;
+}
+.ps-link.primary { background:var(--accent); color:var(--bg); }
+.ps-link.primary:hover { background:var(--gold); }
+.ps-link.secondary { border:1px solid var(--border); color:var(--muted); }
+.ps-link.secondary:hover { border-color:var(--accent); color:var(--accent); }
+
+/* ── Footer ── */
+.doc-footer {
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  padding:4rem 5vw;
+  text-align:center;
+}
+.footer-logo {
+  font-family:var(--fhead); font-size:2rem; font-weight:800;
+  color:var(--text); letter-spacing:.05em; margin-bottom:1rem;
+}
+.footer-logo span { color:var(--accent); }
+.footer-meta {
+  font-family:var(--fhead); font-size:.7rem; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:.6rem;
+}
+.footer-copy {
+  font-size:.85rem; color:var(--muted); margin-top:.5rem;
+}
+.footer-copy strong { color:var(--accent); font-style:normal; }
+.footer-divider {
+  width:60px; height:1px; background:var(--border);
+  margin:1.5rem auto;
+}
+.footer-made {
+  font-family:var(--fhead); font-size:.78rem; letter-spacing:.15em;
+  text-transform:uppercase;
+  background:linear-gradient(90deg,var(--accent),var(--gold));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+
+/* ── Reveal ── */
+.reveal { opacity:0; transform:translateY(28px); transition:opacity .65s ease,transform .65s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+</style>
+</head>
+<body>
+
+<div id="read-progress"></div>
+<div id="cur"></div>
+<div id="cur-r"></div>
+
+<!-- NAV -->
+<nav class="top-nav">
+  <a class="nav-brand" href="#">
+    <span class="dot"></span>
+    WebDev Docs
+  </a>
+  <div class="nav-links">
+    <a href="#day1">Day 1</a>
+    <a href="#day2">Day 2</a>
+    <a href="#day3">Day 3</a>
+    <a href="#day4">Day 4</a>
+    <a href="#day5">Day 5</a>
+    <a href="#day6">Day 6</a>
+    <a href="#day7">Day 7</a>
+  </div>
+</nav>
+
+<!-- Timeline nav dots -->
+<nav class="timeline-nav" id="timelineNav">
+  <div class="tl-dot" data-target="day1" title="Day 1"></div>
+  <div class="tl-dot" data-target="day2" title="Day 2"></div>
+  <div class="tl-dot" data-target="day3" title="Day 3"></div>
+  <div class="tl-dot" data-target="day4" title="Day 4"></div>
+  <div class="tl-dot" data-target="day5" title="Day 5"></div>
+  <div class="tl-dot" data-target="day6" title="Day 6"></div>
+  <div class="tl-dot" data-target="day7" title="Day 7"></div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <p class="hero-eyebrow">FabLab · Web Development Module · 7-Day Journal</p>
+  <h1>Mastering<br>the <em>Web</em></h1>
+  <p class="hero-desc">A complete documented journey through HTML, CSS, and JavaScript — from writing your very first tag to deploying a fully functional To-Do app on the internet.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><span class="hero-meta-num">07</span><span class="hero-meta-lbl">Days</span></div>
+    <div class="hero-meta-item"><span class="hero-meta-num">3</span><span class="hero-meta-lbl">Technologies</span></div>
+    <div class="hero-meta-item"><span class="hero-meta-num">01</span><span class="hero-meta-lbl">Live Project</span></div>
+    <div class="hero-meta-item"><span class="hero-meta-num">∞</span><span class="hero-meta-lbl">Things Learned</span></div>
+  </div>
+  <div class="hero-code-badge"><span class="cmt">// The journey begins</span>
+<span class="kw">&lt;!DOCTYPE</span> html<span class="kw">&gt;</span>
+<span class="kw">&lt;html&gt;</span>
+  <span class="kw">&lt;body&gt;</span>
+    <span class="kw">&lt;h1&gt;</span><span class="st">Hello, World!</span><span class="kw">&lt;/h1&gt;</span>
+  <span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span></div>
+  <div class="hero-scroll">Scroll to explore</div>
+</section>
+
+<!-- ══════════════════════════════
+     DAY 1
+══════════════════════════════ -->
+<section class="section-wrap day-1" id="day1">
+  <p class="chapter-label reveal">// Chapter 01</p>
+
+  <div class="day-header reveal">
+    <div class="day-number">01</div>
+    <div class="day-title-block">
+      <h2 class="day-title">HTML Basics</h2>
+      <p class="day-subtitle">Introduction to the building blocks of every webpage — writing your very first HTML document.</p>
+    </div>
+  </div>
+
+  <div class="day-img-wrap reveal">
+    <img src="day1.jpeg" alt="HTML code on screen">
+    <div class="day-img-overlay"></div>
+    <span class="day-img-tag">Day 01 · HTML Fundamentals</span>
+  </div>
+
+  <div class="day-body reveal">
+    <div>
+      <div class="topics-card">
+        <div class="topics-card-label">Covered Topics</div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Set up VS Code &amp; created first <code>.html</code> file</div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Used tags: <code>p</code>, <code>b</code>, <code>i</code>, <code>u</code>, <code>br</code>, <code>hr</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Text effects with <code>marquee</code>, <code>sub</code>, <code>sup</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Understood HTML document structure &amp; nesting</div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Practiced heading tags <code>h1–h6</code> &amp; paragraphs</div></div>
+      </div>
+      <div class="concept-pills" style="margin-top:1.2rem">
+        <span class="pill">Semantic HTML</span>
+        <span class="pill">Tag Nesting</span>
+        <span class="pill">Document Structure</span>
+        <span class="pill">VS Code Setup</span>
+      </div>
+    </div>
+
+    <div class="day-prose">
+      <h3>What is HTML?</h3>
+      <p><strong>HyperText Markup Language (HTML)</strong> is the skeleton of every webpage. It defines the meaning and structure of content using a system of elements represented by tags. A tag is written between angle brackets — <code>&lt;tagname&gt;</code>.</p>
+      <h3>The Document Skeleton</h3>
+      <div class="code-block"><span class="cb-label">HTML</span><span class="cb-tag">&lt;!DOCTYPE</span> <span class="cb-attr">html</span><span class="cb-tag">&gt;</span>
+<span class="cb-tag">&lt;html</span> <span class="cb-attr">lang</span>=<span class="cb-val">"en"</span><span class="cb-tag">&gt;</span>
+  <span class="cb-tag">&lt;head&gt;</span>
+    <span class="cb-tag">&lt;meta</span> <span class="cb-attr">charset</span>=<span class="cb-val">"UTF-8"</span><span class="cb-tag">&gt;</span>
+    <span class="cb-tag">&lt;title&gt;</span>My First Page<span class="cb-tag">&lt;/title&gt;</span>
+  <span class="cb-tag">&lt;/head&gt;</span>
+  <span class="cb-tag">&lt;body&gt;</span>
+    <span class="cb-tag">&lt;h1&gt;</span>Hello World!<span class="cb-tag">&lt;/h1&gt;</span>
+    <span class="cb-tag">&lt;p&gt;</span>My <span class="cb-tag">&lt;b&gt;</span>first<span class="cb-tag">&lt;/b&gt;</span> webpage.<span class="cb-tag">&lt;/p&gt;</span>
+  <span class="cb-tag">&lt;/body&gt;</span>
+<span class="cb-tag">&lt;/html&gt;</span></div>
+      <div class="info-box">
+        <div class="info-box-label">💡 Key Insight</div>
+        <p>Every HTML document needs <code>&lt;!DOCTYPE html&gt;</code> at the top — it tells the browser to use modern HTML5 standards. Without it, browsers enter "quirks mode" and may render things unexpectedly.</p>
+      </div>
+      <h3>Heading Hierarchy</h3>
+      <p>HTML provides <strong>six heading levels</strong> (<code>h1</code> through <code>h6</code>). <code>h1</code> is the most important and should be used once per page, like a book's title. Always use headings in order — never skip from h1 to h4.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     DAY 2
+══════════════════════════════ -->
+<section class="section-wrap day-2" id="day2">
+  <p class="chapter-label reveal">// Chapter 02</p>
+  <div class="day-header reveal">
+    <div class="day-number">02</div>
+    <div class="day-title-block">
+      <h2 class="day-title">Image, Anchor,<br>Media &amp; Table</h2>
+      <p class="day-subtitle">Embedding rich content and linking pages — making HTML truly interactive and visual.</p>
+    </div>
+  </div>
+
+  <div class="day-img-wrap reveal">
+    <img src="day2.jpeg" alt="Web design and multimedia">
+    <div class="day-img-overlay"></div>
+    <span class="day-img-tag">Day 02 · Media &amp; Tables</span>
+  </div>
+
+  <div class="day-body reveal">
+    <div>
+      <div class="topics-card">
+        <div class="topics-card-label">Covered Topics</div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Inserted images with <code>&lt;img&gt;</code> &amp; attributes</div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Created hyperlinks using <code>&lt;a href&gt;</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Embedded video &amp; audio with <code>&lt;video&gt;</code>, <code>&lt;audio&gt;</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Built structured data tables — rows, cols, colspan</div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Added table headers, borders &amp; captions</div></div>
+      </div>
+      <div class="concept-pills" style="margin-top:1.2rem">
+        <span class="pill">Hyperlinks</span><span class="pill">Multimedia</span>
+        <span class="pill">Tables</span><span class="pill">alt Text</span>
+      </div>
+    </div>
+    <div class="day-prose">
+      <h3>Images &amp; Accessibility</h3>
+      <p>The <code>&lt;img&gt;</code> tag is <strong>self-closing</strong> — it has no closing tag. The <code>alt</code> attribute is essential: screen readers use it to describe the image to visually impaired users, and search engines use it for indexing.</p>
+      <div class="code-block"><span class="cb-label">HTML</span><span class="cb-cmt">&lt;!-- Good practice --&gt;</span>
+<span class="cb-tag">&lt;img</span>
+  <span class="cb-attr">src</span>=<span class="cb-val">"profile.jpg"</span>
+  <span class="cb-attr">alt</span>=<span class="cb-val">"Nitin smiling at camera"</span>
+  <span class="cb-attr">width</span>=<span class="cb-val">"400"</span>
+  <span class="cb-attr">height</span>=<span class="cb-val">"300"</span>
+  <span class="cb-attr">loading</span>=<span class="cb-val">"lazy"</span>
+<span class="cb-tag">&gt;</span></div>
+      <h3>Tables — Structured Data</h3>
+      <p>HTML tables use a <strong>row-first</strong> model: <code>&lt;tr&gt;</code> creates a row, then <code>&lt;td&gt;</code> fills cells within it. Use <code>colspan</code> and <code>rowspan</code> to merge cells across columns or rows — great for complex data layouts.</p>
+      <div class="info-box">
+        <div class="info-box-label">⚠️ Common Mistake</div>
+        <p>Never use tables for page layout — that's what CSS is for. Tables are strictly for <strong>tabular data</strong> (schedules, comparisons, spreadsheets). Misusing tables breaks accessibility and responsiveness.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     DAY 3
+══════════════════════════════ -->
+<section class="section-wrap day-3" id="day3">
+  <p class="chapter-label reveal">// Chapter 03</p>
+  <div class="day-header reveal">
+    <div class="day-number">03</div>
+    <div class="day-title-block">
+      <h2 class="day-title">HTML Forms</h2>
+      <p class="day-subtitle">Collecting user input — the gateway to dynamic and interactive web applications.</p>
+    </div>
+  </div>
+
+  <div class="day-img-wrap reveal">
+    <img src="day3.jpeg" alt="Form and input UI">
+    <div class="day-img-overlay"></div>
+    <span class="day-img-tag">Day 03 · HTML Forms</span>
+  </div>
+
+  <div class="day-body reveal">
+    <div>
+      <div class="topics-card">
+        <div class="topics-card-label">Covered Topics</div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Built forms with <code>&lt;form&gt;</code>, <code>action</code>, <code>method</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Input types: text, email, password, number, date</div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Used radio buttons, checkboxes &amp; dropdowns</div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Added <code>textarea</code>, <code>submit</code> &amp; <code>reset</code> buttons</div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Applied <code>label</code>, <code>placeholder</code> &amp; <code>required</code></div></div>
+      </div>
+      <div class="concept-pills" style="margin-top:1.2rem">
+        <span class="pill">Form Validation</span><span class="pill">GET vs POST</span>
+        <span class="pill">Accessibility</span><span class="pill">Input Types</span>
+      </div>
+    </div>
+    <div class="day-prose">
+      <h3>Forms — How the Web Listens</h3>
+      <p>The <code>&lt;form&gt;</code> element wraps all inputs and has two critical attributes: <code>action</code> (where data is sent) and <code>method</code> (<code>GET</code> appends data to the URL; <code>POST</code> sends it hidden in the request body — always use POST for sensitive data).</p>
+      <div class="code-block"><span class="cb-label">HTML</span><span class="cb-tag">&lt;form</span> <span class="cb-attr">action</span>=<span class="cb-val">"/submit"</span> <span class="cb-attr">method</span>=<span class="cb-val">"POST"</span><span class="cb-tag">&gt;</span>
+  <span class="cb-tag">&lt;label</span> <span class="cb-attr">for</span>=<span class="cb-val">"email"</span><span class="cb-tag">&gt;</span>Email<span class="cb-tag">&lt;/label&gt;</span>
+  <span class="cb-tag">&lt;input</span>
+    <span class="cb-attr">type</span>=<span class="cb-val">"email"</span>
+    <span class="cb-attr">id</span>=<span class="cb-val">"email"</span>
+    <span class="cb-attr">name</span>=<span class="cb-val">"email"</span>
+    <span class="cb-attr">placeholder</span>=<span class="cb-val">"you@example.com"</span>
+    <span class="cb-attr">required</span>
+  <span class="cb-tag">&gt;</span>
+  <span class="cb-tag">&lt;button</span> <span class="cb-attr">type</span>=<span class="cb-val">"submit"</span><span class="cb-tag">&gt;</span>Submit<span class="cb-tag">&lt;/button&gt;</span>
+<span class="cb-tag">&lt;/form&gt;</span></div>
+      <div class="info-box">
+        <div class="info-box-label">💡 Best Practice</div>
+        <p>Always link <code>&lt;label&gt;</code> to its input using matching <code>for</code> and <code>id</code> attributes. This expands the clickable area and greatly improves accessibility for keyboard and screen-reader users.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     DAY 4
+══════════════════════════════ -->
+<section class="section-wrap day-4" id="day4">
+  <p class="chapter-label reveal">// Chapter 04</p>
+  <div class="day-header reveal">
+    <div class="day-number">04</div>
+    <div class="day-title-block">
+      <h2 class="day-title">Semantic HTML<br>&amp; CSS Selectors</h2>
+      <p class="day-subtitle">Structuring pages semantically and targeting elements with the full power of CSS.</p>
+    </div>
+  </div>
+
+  <div class="day-img-wrap reveal">
+    <img src="day4.jpeg" alt="CSS styling code">
+    <div class="day-img-overlay"></div>
+    <span class="day-img-tag">Day 04 · CSS Selectors</span>
+  </div>
+
+  <div class="day-body reveal">
+    <div>
+      <div class="topics-card">
+        <div class="topics-card-label">Covered Topics</div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Semantic tags: <code>header</code>, <code>nav</code>, <code>footer</code>, <code>main</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">CSS selectors: element, class <code>(.)</code>, ID <code>(#)</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Pseudo-classes: <code>:hover</code>, <code>:first-child</code>, <code>:nth-child</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Attribute selectors &amp; combinator selectors</div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Styled a full-page layout with nav &amp; footer</div></div>
+      </div>
+      <div class="concept-pills" style="margin-top:1.2rem">
+        <span class="pill">Specificity</span><span class="pill">Cascade</span>
+        <span class="pill">Pseudo-classes</span><span class="pill">Combinators</span>
+      </div>
+    </div>
+    <div class="day-prose">
+      <h3>Why Semantic HTML Matters</h3>
+      <p>Using <code>&lt;header&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;nav&gt;</code>, and <code>&lt;footer&gt;</code> instead of generic <code>&lt;div&gt;</code> tags tells <strong>search engines and assistive technologies</strong> what each section of the page means — massively improving SEO and accessibility.</p>
+      <h3>CSS Selector Power</h3>
+      <div class="code-block"><span class="cb-label">CSS</span><span class="cb-cmt">/* Element selector */</span>
+<span class="cb-fn">p</span> { <span class="cb-attr">color</span>: <span class="cb-val">#607080</span>; }
+
+<span class="cb-cmt">/* Class selector */</span>
+<span class="cb-fn">.card</span> { <span class="cb-attr">background</span>: <span class="cb-val">#111</span>; }
+
+<span class="cb-cmt">/* Pseudo-class */</span>
+<span class="cb-fn">a:hover</span> { <span class="cb-attr">color</span>: <span class="cb-val">#00e5ff</span>; }
+
+<span class="cb-cmt">/* Combinator — direct child */</span>
+<span class="cb-fn">nav > a</span> { <span class="cb-attr">font-weight</span>: <span class="cb-val">600</span>; }
+
+<span class="cb-cmt">/* Attribute selector */</span>
+<span class="cb-fn">input[type="email"]</span> { <span class="cb-attr">border</span>: <span class="cb-val">1px solid cyan</span>; }</div>
+      <div class="info-box">
+        <div class="info-box-label">📌 CSS Specificity</div>
+        <p>Specificity determines which rule wins when multiple rules target the same element. IDs (100) beat classes (10), which beat elements (1). <code>!important</code> overrides all — but use it sparingly as a last resort.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     DAY 5
+══════════════════════════════ -->
+<section class="section-wrap day-5" id="day5">
+  <p class="chapter-label reveal">// Chapter 05</p>
+  <div class="day-header reveal">
+    <div class="day-number">05</div>
+    <div class="day-title-block">
+      <h2 class="day-title">Box Model<br>&amp; Flexbox</h2>
+      <p class="day-subtitle">Mastering layout — understanding spacing and building flexible, responsive arrangements.</p>
+    </div>
+  </div>
+
+  <div class="day-img-wrap reveal">
+    <img src="day5.jpeg" alt="Layout and design">
+    <div class="day-img-overlay"></div>
+    <span class="day-img-tag">Day 05 · Box Model &amp; Flexbox</span>
+  </div>
+
+  <div class="day-body reveal">
+    <div>
+      <div class="topics-card">
+        <div class="topics-card-label">Covered Topics</div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Box Model: <code>margin</code>, <code>border</code>, <code>padding</code>, <code>content</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text"><code>box-sizing: border-box</code> explained</div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Flexbox: <code>display:flex</code>, <code>flex-direction</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text"><code>justify-content</code>, <code>align-items</code>, <code>gap</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Built a responsive card layout using Flexbox</div></div>
+      </div>
+      <div class="concept-pills" style="margin-top:1.2rem">
+        <span class="pill">Box Model</span><span class="pill">Flexbox</span>
+        <span class="pill">Responsive</span><span class="pill">Spacing</span>
+      </div>
+    </div>
+    <div class="day-prose">
+      <h3>The Box Model — Everything is a Box</h3>
+      <p>Every HTML element is a rectangular box. From outside to inside: <strong>margin</strong> (space outside) → <strong>border</strong> → <strong>padding</strong> (space inside) → <strong>content</strong>. Setting <code>box-sizing: border-box</code> makes width calculations intuitive — padding and border are included inside the declared width.</p>
+      <h3>Flexbox — One Axis at a Time</h3>
+      <div class="code-block"><span class="cb-label">CSS</span><span class="cb-fn">.container</span> {
+  <span class="cb-attr">display</span>: <span class="cb-val">flex</span>;
+  <span class="cb-attr">flex-direction</span>: <span class="cb-val">row</span>;       <span class="cb-cmt">/* or column */</span>
+  <span class="cb-attr">justify-content</span>: <span class="cb-val">space-between</span>; <span class="cb-cmt">/* main axis */</span>
+  <span class="cb-attr">align-items</span>: <span class="cb-val">center</span>;       <span class="cb-cmt">/* cross axis */</span>
+  <span class="cb-attr">gap</span>: <span class="cb-val">1.5rem</span>;               <span class="cb-cmt">/* space between */</span>
+  <span class="cb-attr">flex-wrap</span>: <span class="cb-val">wrap</span>;            <span class="cb-cmt">/* allow wrapping */</span>
+}</div>
+      <div class="info-box">
+        <div class="info-box-label">🧠 Mental Model</div>
+        <p>Think of Flexbox as <strong>one-dimensional</strong> layout — it handles either a row or a column at a time. For two-dimensional grid layouts (rows AND columns simultaneously), reach for CSS Grid instead.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     DAY 6
+══════════════════════════════ -->
+<section class="section-wrap day-6" id="day6">
+  <p class="chapter-label reveal">// Chapter 06</p>
+  <div class="day-header reveal">
+    <div class="day-number">06</div>
+    <div class="day-title-block">
+      <h2 class="day-title">JavaScript<br>Basics &amp; Operations</h2>
+      <p class="day-subtitle">Bringing pages to life — writing logic, manipulating the DOM, and handling all core JS operations.</p>
+    </div>
+  </div>
+
+  <div class="day-img-wrap reveal">
+    <img src="day6.jpeg" alt="JavaScript code">
+    <div class="day-img-overlay"></div>
+    <span class="day-img-tag">Day 06 · JavaScript</span>
+  </div>
+
+  <div class="day-body reveal">
+    <div>
+      <div class="topics-card">
+        <div class="topics-card-label">Covered Topics</div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Variables: <code>var</code>, <code>let</code>, <code>const</code> &amp; data types</div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Arithmetic, comparison &amp; logical operators</div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Conditionals: <code>if/else</code>, <code>switch</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Loops: <code>for</code>, <code>while</code>, <code>do-while</code></div></div>
+        <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Functions, DOM selection &amp; event listeners</div></div>
+      </div>
+      <div class="concept-pills" style="margin-top:1.2rem">
+        <span class="pill">DOM API</span><span class="pill">Events</span>
+        <span class="pill">Functions</span><span class="pill">Scope</span>
+      </div>
+    </div>
+    <div class="day-prose">
+      <h3>Variables — Choosing the Right Keyword</h3>
+      <p>Prefer <code>const</code> by default. Use <code>let</code> when you need to reassign. Avoid <code>var</code> — it has function scope and hoisting behaviour that causes subtle bugs. Always declare before use.</p>
+      <h3>DOM Manipulation</h3>
+      <div class="code-block"><span class="cb-label">JavaScript</span><span class="cb-cmt">// Select an element</span>
+<span class="cb-kw">const</span> btn = document.<span class="cb-fn">querySelector</span>(<span class="cb-str">'#myBtn'</span>);
+
+<span class="cb-cmt">// Listen for a click</span>
+btn.<span class="cb-fn">addEventListener</span>(<span class="cb-str">'click'</span>, () => {
+  <span class="cb-kw">const</span> box = document.<span class="cb-fn">getElementById</span>(<span class="cb-str">'box'</span>);
+  box.style.background = <span class="cb-str">'#00e5ff'</span>;
+  box.textContent = <span class="cb-str">'Clicked! ✓'</span>;
+});
+
+<span class="cb-cmt">// Loop example</span>
+<span class="cb-kw">for</span> (<span class="cb-kw">let</span> i = <span class="cb-num">0</span>; i &lt; <span class="cb-num">5</span>; i++) {
+  console.<span class="cb-fn">log</span>(<span class="cb-str">`Item ${i}`</span>);
+}</div>
+      <div class="info-box">
+        <div class="info-box-label">🔑 Core Concept</div>
+        <p>The DOM (Document Object Model) is a live tree of objects representing your HTML. JavaScript can read and <strong>rewrite any part of this tree</strong> in real time — that's what makes web pages dynamic and interactive.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════
+     DAY 7
+══════════════════════════════ -->
+<section class="section-wrap day-7" id="day7">
+  <p class="chapter-label reveal">// Chapter 07 — Final Project</p>
+  <div class="day-header reveal">
+    <div class="day-number">07</div>
+    <div class="day-title-block">
+      <h2 class="day-title">To-Do List<br>Final Project</h2>
+      <p class="day-subtitle">The culmination of everything — combining HTML, CSS, and JavaScript into one complete, deployed web application.</p>
+    </div>
+  </div>
+
+  <div class="day-body reveal" style="grid-template-columns:1fr;gap:2.5rem">
+
+    <!-- Project showcase -->
+    <div class="project-showcase">
+      <div class="ps-img">
+        <img src="day7.jpeg" alt="To Do List App">
+      </div>
+      <div class="ps-body">
+        <div class="ps-tag">Final Project · HTML + CSS + JS</div>
+        <div class="ps-title">To-Do List App</div>
+        <p class="ps-desc">A fully functional task manager built from scratch. Add tasks, mark them complete, delete them — and everything persists across browser refreshes thanks to localStorage.</p>
+        <div class="ps-links">
+          <a href="#" class="ps-link primary">View Live</a>
+          <a href="#" class="ps-link secondary">GitHub Repo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Topics + Prose side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem">
+      <div>
+        <div class="topics-card">
+          <div class="topics-card-label">What Was Built</div>
+          <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Full To-Do List app from scratch</div></div>
+          <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Add, delete &amp; mark tasks as complete</div></div>
+          <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Used <code>localStorage</code> to persist tasks on refresh</div></div>
+          <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Combined HTML + CSS + JS end-to-end</div></div>
+          <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Pushed code to GitHub repository</div></div>
+          <div class="topic-item"><div class="topic-bullet"><i></i></div><div class="topic-text">Deployed live on GitHub Pages</div></div>
+        </div>
+      </div>
+      <div class="day-prose">
+        <h3>localStorage — Persistence Without a Server</h3>
+        <p><strong>localStorage</strong> is a browser API that stores up to ~5MB of key-value string data permanently — it survives page refreshes and browser restarts, unlike session variables.</p>
+        <div class="code-block"><span class="cb-label">JavaScript</span><span class="cb-cmt">// Save tasks array</span>
+<span class="cb-kw">const</span> saveTasks = (tasks) => {
+  localStorage.<span class="cb-fn">setItem</span>(<span class="cb-str">'tasks'</span>,
+    JSON.<span class="cb-fn">stringify</span>(tasks));
+};
+
+<span class="cb-cmt">// Load on page open</span>
+<span class="cb-kw">const</span> tasks = JSON.<span class="cb-fn">parse</span>(
+  localStorage.<span class="cb-fn">getItem</span>(<span class="cb-str">'tasks'</span>) || <span class="cb-str">'[]'</span>
+);
+
+<span class="cb-cmt">// Mark complete</span>
+task.done = !task.done;
+<span class="cb-fn">saveTasks</span>(tasks);</div>
+        <div class="info-box">
+          <div class="info-box-label">🚀 Deployment</div>
+          <p>GitHub Pages lets you host any static site for free. Push to a <code>gh-pages</code> branch or enable Pages in repo Settings — your site goes live at <code>username.github.io/repo-name</code> in minutes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="doc-footer">
+  <div class="footer-logo">Web<span>Dev</span></div>
+  <p class="footer-meta">FabLab Documentation Series · Web Development Module</p>
+  <div class="footer-divider"></div>
+  <p class="footer-copy">
+    From HTML basics to a live deployed app — a 7-day journey through the foundations of the web.<br>
+    <strong>All techniques and code documented are practiced hands-on during FabLab sessions.</strong>
+  </p>
+  <div style="margin-top:2rem">
+    <p class="footer-made">✦ Made by Nitin Rakde — All Rights Reserved © 2025 ✦</p>
+    <p style="font-family:'Fira Code',monospace;font-size:.7rem;color:var(--muted);margin-top:.6rem;letter-spacing:.05em;">
+      &lt;built with passion, documented with purpose /&gt;
+    </p>
+  </div>
+</footer>
+
+<script>
+/* ── Read Progress ── */
+const bar = document.getElementById('read-progress');
+window.addEventListener('scroll', () => {
+  const max = document.body.scrollHeight - window.innerHeight;
+  bar.style.width = (window.scrollY / max * 100) + '%';
+});
+
+/* ── Custom Cursor ── */
+const cur = document.getElementById('cur');
+const curR = document.getElementById('cur-r');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  cur.style.left=mx+'px'; cur.style.top=my+'px';
+});
+(function animR(){ rx+=(mx-rx)*.11; ry+=(my-ry)*.11; curR.style.left=rx+'px'; curR.style.top=ry+'px'; requestAnimationFrame(animR); })();
+document.querySelectorAll('a,button,.ps-link,.tl-dot').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ cur.style.width='16px'; cur.style.height='16px'; curR.style.width='50px'; curR.style.height='50px'; });
+  el.addEventListener('mouseleave',()=>{ cur.style.width='8px'; cur.style.height='8px'; curR.style.width='32px'; curR.style.height='32px'; });
+});
+
+/* ── Scroll Reveal ── */
+const revObs = new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{ if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'),i*70); revObs.unobserve(e.target); } });
+},{ threshold:.07 });
+document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
+
+/* ── Timeline dots active ── */
+const daySections = ['day1','day2','day3','day4','day5','day6','day7'];
+const tlDots = document.querySelectorAll('.tl-dot');
+
+tlDots.forEach(dot=>{
+  dot.addEventListener('click',()=>{
+    const t=document.getElementById(dot.dataset.target);
+    if(t) t.scrollIntoView({behavior:'smooth'});
+  });
+});
+
+const secEls = daySections.map(id=>document.getElementById(id));
+window.addEventListener('scroll',()=>{
+  let current='';
+  secEls.forEach(s=>{ if(s && window.scrollY>=s.offsetTop-250) current=s.id; });
+  tlDots.forEach(d=>{ d.classList.toggle('active', d.dataset.target===current); });
+
+  // Nav active
+  document.querySelectorAll('.nav-links a').forEach(a=>{
+    a.classList.toggle('active', a.getAttribute('href')==='#'+current);
+  });
+});
+
+/* ── Code block copy-on-click hint ── */
+document.querySelectorAll('.code-block').forEach(block=>{
+  block.style.cursor='pointer';
+  block.title='Click to copy';
+  block.addEventListener('click',()=>{
+    const text=block.innerText.replace(/^[A-Z]+\n/,'');
+    navigator.clipboard.writeText(text).catch(()=>{});
+    const label=block.querySelector('.cb-label');
+    if(label){ const orig=label.textContent; label.textContent='Copied!'; label.style.background='var(--green)'; label.style.color='#000'; setTimeout(()=>{ label.textContent=orig; label.style.background=''; label.style.color=''; },1500); }
+  });
+});
+
+/* ── Parallax on hero code badge ── */
+window.addEventListener('scroll',()=>{
+  const badge=document.querySelector('.hero-code-badge');
+  if(badge) badge.style.transform=`translateY(${window.scrollY*.12}px)`;
+});
+</script>
+</body>
+</html>
